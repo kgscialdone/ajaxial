@@ -2,9 +2,9 @@
   "name": "ajaxial",
   "displayName": "Ajaxial",
   "description": "Editor support for Ajaxial.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "kgscialdone",
-  "repository": "https://github.com/kgscialdone/ajaxial/editors/vscode",
+  "repository": "https://github.com/kgscialdone/ajaxial/tree/master/editors/vscode",
   "homepage": "https://github.com/kgscialdone/ajaxial",
   "engines": {
     "vscode": "^1.22.0"
