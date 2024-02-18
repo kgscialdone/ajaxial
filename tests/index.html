@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajaxial Test Suite</title>
+
+  <script src="/ajaxial.js"></script>
+  <script type="module">
+    import { html } from './utils.js'
+
+    for(let testFile of [
+      './core.js',
+      './fetch.js',
+      './extension.js',
+      './test-bootstrap.js'
+    ]) {
+      (await import(testFile)).default(function describe(categoryName, tests) {
+        output.append(html`<details class='category'>
+          <summary>
+            <h2>${categoryName}</h2>
+            <p>pass: <span>0</span>, fail: <span>0</span>, pending: <span>0</span></p>
+          </summary>
+        </details>`)
+        const categoryOut = output.querySelector(':scope > details:last-of-type')
+        const [passCount, failCount, pendCount] = categoryOut.querySelectorAll('span')
+
+        tests(async function it(testName, callback) {
+          categoryOut.append(html`<details><summary>it ${testName}</summary></details>`)
+          const testOut = categoryOut.querySelector('details:last-of-type')
+          pendCount.innerText = ++pendCount.innerText
+
+          try {
+            if(callback.length > 0) {
+              temp.append(html`<div data-test="${testName}"></div>`)
+              const testTemp = temp.querySelector(`div[data-test="${testName}"]`)
+              await callback(testTemp)
+            } else {
+              await callback()
+            }
+            testOut.classList.add('pass')
+            passCount.innerText = ++passCount.innerText
+          } catch(err) {
+            testOut.classList.add('fail')
+            failCount.innerText = ++failCount.innerText
+            categoryOut.setAttribute('open', '')
+            testOut.setAttribute('open', '')
+            const errPre = document.createElement('pre')
+            errPre.style.color = 'red'
+            errPre.innerText = `${err.stack ?? err}`
+            testOut.append(errPre)
+          } finally {
+            pendCount.innerText = --pendCount.innerText
+          }
+        })
+      })
+    }
+  </script>
+  <style>
+    :root { font: 14px system-ui; }
+    pre { font-size: 12px; margin-left: 20px; }
+    h2 {  margin-top: -0.2em; margin-right: 10px; }
+    details { 
+      user-select: none; 
+      margin-bottom: 5px; 
+      clear: both; 
+
+      &.category > summary {
+        & * { display: inline; }
+        &::marker { content: none; }
+        & h2::before {
+          content: '▶';
+          position: relative;
+          top: -3px;
+          display: inline-block;
+          font-size: 0.7em;
+          margin-right: 5px;
+          transition: rotate 50ms linear;
+        }
+      }
+      &.category[open] h2::before {
+        rotate: 90deg;
+      }
+
+      &:not(.category) {
+        margin-left: 30px;
+
+        &.pass {
+          color: green; 
+          ::marker { content: '✓ '; } 
+        }
+
+        &.fail {
+          color: red; 
+          ::marker { content: '✗ '; }
+          & summary { cursor: pointer; }
+        }
+
+        &:not(.pass,.fail) {
+          color: goldenrod;
+          ::marker { content: none; }
+          ::before { 
+            content: '◠'; 
+            display: inline-block; 
+            margin-right: 2px; 
+            animation: spin 1s infinite linear;
+          }
+        }
+      }
+    }
+    @keyframes spin {
+      from { rotate: 0deg; }
+      to { rotate: 360deg; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Ajaxial Test Suite</h1>
+  <output id="output"></output>
+  <section id="temp" style="display:none"></section>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajaxial | Documentation</title>
+  <link rel="icon" href="/assets/favicon.png" />
+
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/ajaxial.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/index.js" defer></script>
+</head>
+<body id="top">
+  <header>
+    <span><img src="/assets/helmet.svg" /> Ajaxial</span>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/docs">Documentation</a>
+      <a href="https://github.com/kgscialdone/ajaxial" target="_blank">Github</a>
+    </nav>
+  </header>
+
+  <h1>Ajaxial Documentation</h1>
+  <div class="toc-wrapper">
+    <nav>
+      <b>Table of Contents</b>
+    </nav>
+    <article arial-label="Ajaxial Documentation">
+      <h2>Introduction</h2>
+      <p>Ajaxial is a library that embeds instructions for AJAX operations directly in your HTML structure, allowing you to easily model client-server interactions with little to no JavaScript. In order to do so, it offers a host of custom attributes that can be applied to any HTML element, which define Ajaxial's behavior.</p>
+
+      <p>For a simple example, the following HTML will show a button at the end of a partial article, which will replace itself with the rest of the article when clicked, assuming the proper server-side structure.</p>
+
+      <script type="codeblock">
+        <article>
+          <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Praesentium facilis aut assumenda perspiciatis eaque optio quaerat expedita voluptas, deleniti delectus ipsa beatae totam iure impedit quas architecto tenetur qui quisquam.</p>
+          <p>Rem, sed odit! Consectetur nisi unde laboriosam incidunt hic ex aspernatur voluptate corrupti eaque, ea totam illum et alias excepturi consequuntur quasi odio. Omnis veniam doloremque neque quidem magnam quis!</p>
+          <p>Quo aut, alias eaque unde exercitationem repudiandae ducimus. Magnam tempora non labore dicta maxime. Soluta officia voluptates, hic numquam magnam facere alias ab repellendus doloremque perspiciatis consectetur beatae at nostrum!</p>
+        
+          <button ajxl-path="/articles/ajaxial-example/read-more"
+                  ajxl-swap="outerHTML">Read More</button>
+        </article>
+      </script>
+
+      <h2>Installing</h2>
+      <p>You can install Ajaxial by downloading it from the <a href="https://github.com/kgscialdone/releases">Github releases page</a> and including it in your page via <code>&lt;script></code> tag.</p>
+
+      <script type="codeblock">
+        <script src="/ajaxial.min.js"><␛/script>
+      </script>
+
+      <p>Alternatively, you can install it without downloading via a Github CDN like JSDelivr.</p>
+
+      <script type="codeblock">
+        <script src="https://cdn.jsdelivr.net/gh/kgscialdone/ajaxial@␋/ajaxial.min.js"><␛/script>
+      </script>
+      
+      <h3>Editor Support</h3>
+      <p>Ajaxial has extensions that add autocompletion support for the following editors:</p>
+      <ul>
+        <li><a href="https://marketplace.visualstudio.com/items?itemName=kgscialdone.ajaxial" target="_blank">Visual Studio Code</a></li>
+      </ul>
+
+      <h2>Core Attributes</h2>
+      <p>Attributes are the core of Ajaxial's behavior, and allow you to define essentially everything about how your site should behave.</p>
+
+      <h3><code>ajxl-path</code></h3>
+      <p>The single most important attribute Ajaxial offers is <code>ajxl-path</code>. This marks an element as an "entrypoint" for Ajaxial behavior, and also provides the URL to which Ajaxial will make a request when triggered. Putting Ajaxial attributes on an element without <code>ajxl-path</code> will do nothing (unless a child element has <code>ajxl-path</code> &ndash; see <a href="#inheritance">Inheritance</a>).</p>
+
+      <p>In fact, <code>ajxl-path</code> is <em>so</em> important that in some cases, it's the <em>only</em> Ajaxial attribute you need &ndash; every other attribute Ajaxial offers has a reasonable default value when not specified.</p>
+
+      <script type="codeblock">
+        <button ajxl-path="/clicked">Click me!</button>
+      </script>
+      
+      <h3><code>ajxl-event</code></h3>
+      <p>When Ajaxial first finds an element with <code>ajxl-path</code>, the next thing it does is look at its <code>ajxl-event</code> for which events to listen for as triggers. When one of the events listed in <code>ajxl-event</code> is triggered on or bubbles up to that element, Ajaxial will begin its process of firing off a request.</p>
+
+      <script type="codeblock">
+        <input type="text"
+               ajxl-path="/search"
+               ajxl-event="input"
+               ajxl-debounce="300"
+               ajxl-target="#search-results" />
+      </script>
+
+      <p>Keep in mind that since the value of <code>ajxl-event</code> is used immediately when an element is processed, it's the only Ajaxial attribute which cannot have its value changed afterwards; attempting to do so will do nothing.</p>
+
+      <p>As a special shortcut, events that begin with <code>ajaxial:</code>, like <code>ajaxial:load</code>, can be written in shorthand by prefixing them with a colon, e.g. <code>:load</code>.</p>
+
+      <p>If <code>ajxl-event</code> is not specified, Ajaxial will try to pick a reasonable default event based on the type of element it's attaching to:</p>
+      <ul>
+        <li><code>form</code> elements will trigger on <code>submit</code></li>
+        <li><code>input</code>, <code>select</code>, and <code>textarea</code> elements will trigger on <code>change</code></li>
+        <li>All other elements will trigger on <code>click</code></li>
+      </ul>
+
+      <h3><code>ajxl-method</code></h3>
+      <p>Upon triggering, Ajaxial will look at the triggering element's <code>ajxl-method</code> to determine how to retrieve the requested content. The values available by default correspond to the various HTTP request methods:</p>
+      <ul>
+        <li><code>get</code> will perform a GET request to the URL contained in <code>ajxl-path</code>.</li>
+        <li><code>post</code> will perform a POST request.</li>
+        <li><code>put</code> will perform a PUT request.</li>
+        <li><code>patch</code> will perform a PATCH request.</li>
+        <li><code>delete</code> will perform a DELETE request.</li>
+      </ul>
+
+      <p>If <code>ajxl-method</code> is not specified, it will default to <code>get</code>. You can also add your own custom methods &ndash; see <a href="#extending-ajaxial">Extending Ajaxial</a>.</p>
+
+      <script type="codeblock">
+        <form ajxl-path="/subscribe" ajxl-method="post">
+          <input type="email" name="email" required />
+          <button type="submit">Subscribe</button>
+        </form>
+      </script>
+
+      <h3><code>ajxl-target</code></h3>
+      <p>By default, Ajaxial will look to insert the requested content into the triggering element. If you'd like to have it target a different element instead, you can use the <code>ajxl-target</code> attribute to define a CSS selector which will be used to find the target element(s).</p>
+
+      <p>If the selector specified by <code>ajxl-target</code> matches more than one element, the requested content will be duplicated and inserted into each.</p>
+      
+      <script type="codeblock">
+        <div id="tab-view">
+          <button ajxl-path="/tab-1" ajxl-target="#tab-view div">Tab 1</button>
+          <button ajxl-path="/tab-2" ajxl-target="#tab-view div">Tab 2</button>
+          <button ajxl-path="/tab-3" ajxl-target="#tab-view div">Tab 3</button>
+          <div></div>
+        </div>
+      </script>
+
+      <h3><code>ajxl-swap</code></h3>
+      <p>When Ajaxial finishes making a request, it will attempt to insert the response body into the target element(s) as HTML. By default, it will replace the children of the target element(s) with the requested content; however, if you can override this behavior by setting <code>ajxl-swap</code> to one of the following values:</p>
+      <ul>
+        <li><code>innerHTML</code> &ndash; replace the target element's children (default).</li>
+        <li><code>outerHTML</code> &ndash; replace the target element.</li>
+        <li><code>beforeBegin</code> &ndash; insert before the target element.</li>
+        <li><code>afterBegin</code> &ndash; prepend before the target element's children.</li>
+        <li><code>beforeEnd</code> &ndash; append after the target element's children.</li>
+        <li><code>afterEnd</code> &ndash; insert after the target element.</li>
+        <li><code>none</code> &ndash; do not swap in the requested content.</li>
+      </ul>
+
+      <p>You can also add your own custom swap strategies &ndash; see <a href="#extending-ajaxial">Extending Ajaxial</a>.</p>
+
+      <script type="codeblock">
+        <form ajxl-path="/submit-entries" ajxl-method="post">
+          <input type="text" name="entries[]" required />
+          <button ajxl-path="/entry-input" 
+                  ajxl-swap="beforeBegin">New Entry</button>
+          <button type="submit">Submit</button>
+        </form>
+      </script>
+
+      <h3><code>ajxl-params</code></h3>
+      <p>When sending a request, Ajaxial will generally either send no parameters, or if the triggering element is a form it will gather the values of each of that form's inputs as the parameters. If you need to add additional parameters on top of that behavior, you can specify them in JSON format with the <code>ajxl-params</code> attribute.</p>
+
+      <p>Just like automatically loaded parameters, these parameters will be used as the query string for GET/DELETE requests, and the request body for POST/PUT/PATCH requests.</p>
+
+      <script type="codeblock">
+        <button ajxl-path="/load-more" 
+                ajxl-swap="outerHTML" 
+                ajxl-params='{"page":3}'>Load More</button>
+      </script>
+
+      <h2>HTTP Request Attributes</h2>
+      <p>While all of the <a href="#ajxl-method">methods</a> Ajaxial provides by default perform HTTP requests, this does not necessarily apply to custom methods. As a result, the following attributes are only applicable to the default methods, and may or may not be used by custom methods.</p>
+
+      <h3><code>ajxl-encoding</code></h3>
+      <p>Specifies the desired encoding of the request body for POST/PUT/PATCH requests. GET/DELETE requests don't use this attribute, as they send their parameters via the requested URL's query parameters.</p>
+
+      <p>Valid values for this attribute are:</p>
+      <ul>
+        <li><code>application/x-www-form-urlencoded</code> &ndash; encode the body as URL-encoded form data (default).</li>
+        <li><code>application/json</code> &ndash; encode the body as JSON.</li>
+        <li><code>multipart/form-data</code> &ndash; encode the body as multipart form data.</li>
+      </ul>
+
+      <p>You can also add your own custom request encodings &ndash; see <a href="#extending-ajaxial">Extending Ajaxial</a>.</p>
+
+      <script type="codeblock">
+        <form ajxl-path="/upload" 
+              ajxl-method="post" 
+              ajxl-encoding="multipart/form-data">
+          <input type="file" name="file" />
+          <button type="submit">Submit</button>
+        </form>
+      </script>
+
+      <h3><code>ajxl-convert</code></h3>
+      <p>Specifies the process Ajaxial should use for converting the response body from raw text to a <a href="https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment" target="_blank"><code>DocumentFragment</code></a>.</p>
+
+      <p>Valid values for this attribute are:</p>
+      <ul>
+        <li><code>html</code> &ndash; process the response body as HTML, including running <code>&lt;script></code> tags and applying <code>&lt;style></code> tags (default).</li>
+        <li><code>plaintext</code> &ndash; process the response body as normal text rather than HTML code.</li>
+      </ul>
+
+      <p>You can also add your own custom response converters &ndash; see <a href="#extending-ajaxial">Extending Ajaxial</a>.</p>
+
+      <script type="codeblock">
+        <pre><code 
+          ajxl-path="/examples/ajxl-convert"
+          ajxl-event=":load"
+          ajxl-convert="plaintext"></code></pre>
+      </script>
+
+      <h3><code>ajxl-headers</code></h3>
+      <p>By default, the only special HTTP header Ajaxial will send along with requests is the appropriate <code>Content-Type</code> for the given <code>ajxl-encoding</code>. If you need to add additional headers on top of that behavior, you can specify them in JSON format with the <code>ajxl-headers</code> attribute.</p>
+
+      <script type="codeblock">
+        <button ajxl-path="/multitype-content"
+                ajxl-method="post"
+                ajxl-headers='{"Accept":"text/html"}'>Load Content</button>
+      </script>
+
+      <h2>Utility Attributes</h2>
+      <p>Ajaxial also provides a handful of utility attributes with various uses, which can adjust minor elements of its behavior or serve as hooks for external CSS/JavaScript.</p>
+
+      <h3><code>ajxl-debounce</code></h3>
+      <p>If present, Ajaxial will wait the specified number of milliseconds before acting upon a trigger, resetting the timer if another trigger occurs in that time. This is useful in cases such as "seach while typing", in order to prevent a request from being fired off for every single keystroke.</p>
+
+      <script type="codeblock">
+        <input type="text"
+               ajxl-path="/search"
+               ajxl-event="input"
+               ajxl-debounce="300"
+               ajxl-target="#search-results" />
+      </script>
+
+      <h3><code>ajxl-settle</code></h3>
+      <p>If present, Ajaxial will wait the specified number of milliseconds after a swap to remove the <code>ajxl-added</code> attribute from swapped-in elements. Defaults to 20ms if unspecified.</p>
+
+      <script type="codeblock">
+        <button ajxl-path="/toast"
+                ajxl-target="#toast-container"
+                ajxl-settle="3000">Send Toast</button>
+        <style>
+          #toast-container .toast {
+            opacity: 0;
+            transition: opacity 500ms ease-in;
+          }
+          #toast-container .toast[ajxl-added] {
+            opacity: 1;
+          }
+        </style>
+      </script>
+
+      <h3><code>ajxl-inflight</code></h3>
+      <p>Will be automatically added to triggering elements during method execution, such as while waiting for a response to an HTTP request, to allow for hooking into the process with CSS to display loading indicators or similar.</p>
+
+      <h3><code>ajxl-added</code></h3>
+      <p>Will be automatically added to elements at the top level of a response that have just been swapped in, to allow for hooking into the process with CSS to display transitions or similar. Will be removed after 20ms by default, or a number of milliseconds specified by <code>ajxl-settle</code> if present.</p>
+
+      <h2>Inheritance</h2>
+      <p>Except for <code>ajxl-path</code>, all attributes provided by Ajaxial are inherited from parent elements if they aren't present on the triggering element. For example, you can set <code>ajxl-encoding</code> on the page body to very simply ensure all Ajaxial POST requests on your page are sent as JSON:</p>
+
+      <script type="codeblock">
+        <body ajxl-encoding="application/json">
+          <form ajxl-path="/submit" ajxl-method="post">
+            <!-- form inputs -->
+            <button type="submit">Submit</submit>
+          </form>
+        <␛/body>
+      </script>
+
+      <p>If multiple parent elements provide a value for an attribute, the innermost parent takes priority. For example, clicking the button in the example below will send a GET request, not a POST request.</p>
+
+      <script type="codeblock">
+        <div ajxl-method="post">
+          <div ajxl-method="get">
+            <button ajxl-path="/which-method?">Click me!</button>
+          </div>
+        </div>
+      </script>
+
+      <h3><code>disinherit</code></h3>
+      <p>You can also prevent inheritance by setting the value of any Ajaxial attribute to the special keyword value <code>disinherit</code>. If set on the triggering element, the default value will be used, and if set on a parent element, only inherited values within that parent element will be considered.</p>
+
+      <p>For example, the following code will result in the same as the above example, since <code>ajxl-method</code> falls back on the default value of <code>get</code>.</p>
+
+      <script type="codeblock">
+        <div ajxl-method="post">
+          <div ajxl-method="disinherit">
+            <button ajxl-path="/which-method?">Click me!</button>
+          </div>
+        </div>
+      </script>
+
+      <h2>Integrating with JavaScript</h2>
+      <p>While Ajaxial does its best to work seamlessly in as many situations as possible, it simply isn't possible to catch every edge case. In some cases, it will be necessary to manually tell Ajaxial where to look for elements with its attributes.</p>
+
+      <h3>AJAX / Generated Elements</h3>
+      <p>If you use systems other than Ajaxial for AJAX, or generate elements via JavaScript, Ajaxial won't know to look for them by default. You can use the <code>Ajaxial.process</code> function to notify it of new elements.</p>
+
+      <script type="codeblock" data-lang="js">
+        // Pairing Ajaxial with jQuery AJAX is an odd, but valid, choice
+        $.get('/endpoint', data => {
+          $('.output').html(data)
+          Ajaxial.process($('.output')[0])
+        })
+      </script>
+
+      <h3>Shadow DOM</h3>
+      <p>Similarly, Ajaxial doesn't know about or access the shadow DOM on its own. If you want to pair it with web components or other shadow DOM-based libraries, you'll need to call <code>Ajaxial.process</code> on each shadow root to connect it.</p>
+
+      <script type="codeblock" data-lang="js">
+        customElements.define('wc-example', class WebComponentsExample extends HTMLElement {
+          connectedCallback() {
+            let root = this.attachShadow({ mode: 'closed' })
+            root.innerHTML = `<button ajxl-path="/clicked">Click me!</button>`
+            Ajaxial.process(root)
+          }
+        })
+      </script>
+
+      <p>Keep in mind that <code>ajxl-target</code> finds elements based on the root element it's in; if you use it inside of shadow DOM, it will only find elements inside the same shadow root. This means that it's not currently possible for Ajaxial to cross the boundaries of a given shadow root in either direction, bar creating extensions as described below.</p>
+
+      <h2>Extending Ajaxial</h2>
+      <p>While Ajaxial provides an extensive amount of functionality by default, sometimes certain behaviors can only be achieved by extending it with JavaScript. The majority of Ajaxial's functionality is heavily modular to allow for as much extensibility as possible.</p>
+
+      <h3>Custom Methods</h3>
+      <p>By adding new functions to the <code>Ajaxial.methods</code> object, you can add new values to be accepted by <code>ajxl-method</code>.</p>
+
+      <p>Each method is an async function, identified by its key in the <code>Ajaxial.methods</code> object, which takes the following parameters:</p>
+      <ul>
+        <li><code>path</code> &ndash; a string containing the value of the triggering element's <code>ajxl-path</code>.</li>
+        <li><code>source</code> &ndash; the triggering element.</li>
+        <li><code>params</code> &ndash; an object corresponding to the keys and values of each parameter, determined from <code>ajxl-params</code> or form elements.</li>
+      </ul>
+
+      <p>Methods should return either a <a href="https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment" target="_blank"><code>DocumentFragment</code></a> or a function of the form <code>HTMLElement => DocumentFragment</code>. If a <code>DocumentFragment</code> is returned, it will be used directly as the content for each swap; this should be used in 99% of cases.</p> 
+
+      <p>If a function is returned, it will be called for each target element and passed the expected parent element after the swap occurs. Note that this is not necessarily the target element &ndash; this is passed to allow for Ajaxial to determine the context into which the content will be swapped, which may be either the target element or its parent.</p>
+
+      <script type="codeblock">
+        <script>
+          Ajaxial.methods.template = path => {
+            return document.querySelector(`template[name="${path}"]`)?.content
+          }
+        <␛/script>
+        
+        <template name="greeting">
+          <p>Hello, world!</p>
+        </template>
+        
+        <button ajxl-path="greeting" 
+                ajxl-method="template"
+                ajxl-target="#greeting-out">Click me!</button>
+        <div id="greeting-out"></div>
+      </script>
+
+      <h3>Custom Swap Strategies</h3>
+      <p>By adding new functions to the <code>Ajaxial.swapStrategies</code> object, you can add new values to be accepted by <code>axjl-swap</code>.</p>
+
+      <p>Each swap strategy is a function, identified by its key in the <code>Ajaxial.swapStrategies</code> object, which takes the following parameters:</p>
+      <ul>
+        <li><code>target</code> &ndash; the target element.</li>
+        <li><code>fragment</code> &ndash; the <code>DocumentFragment</code> to be swapped in.</li>
+      </ul>
+
+      <p><strong>Note:</strong> swap strategies should absolutely <strong><em>never</em></strong> have unnecessary side effects! In some cases, Ajaxial will attempt to dry-run a swap strategy to determine the parent element after the swap is performed, which may cause unexpected results if the swap strategy performs side effects other than the swap itself.</p>
+
+      <script type="codeblock" data-lang="js">
+        Ajaxial.swapStrategies.appendtwice = (target, fragment) => {
+          target.append(fragment.cloneNode(true))
+          target.append(fragment)
+        }
+      </script>
+
+      <h3>Custom Encodings</h3>
+      <p>By adding new functions to the <code>Ajaxial.requestEncodings</code> object, you can add new values to be accepted by <code>axjl-encoding</code>.</p>
+
+      <p>Each request encoding is a function, identified by its key in the <code>Ajaxial.requestEncodings</code> object, which takes the following parameters:</p>
+      <ul>
+        <li><code>params</code> &ndash; an object corresponding to the keys and values of each parameter, determined from <code>ajxl-params</code> or form elements.</li>
+      </ul>
+
+      <p>Request encodings should return a valid value for a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#body" target="_blank"><code>fetch</code> request body</a>, calculated from the given parameters. Keep in mind that the name of each request encoding <b>must</b> also be a valid <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types" target="_blank">MIME type</a> corresponding to the resulting encoded data.</p>
+
+      <script type="codeblock" data-lang="js">
+        import * as TOML from 'smol-toml'
+
+        Ajaxial.requestEncodings['application/toml'] = params => {
+          return TOML.stringify(params)
+        }
+      </script>
+
+      <h3>Custom Converters</h3>
+      <p>By adding new functions to the <code>Ajaxial.responseConverters</code> object, you can add new values to be accepted by <code>axjl-convert</code>.</p>
+
+      <p>Each response converter is a function, identified by its key in the <code>Ajaxial.responseConverters</code> object, which takes the following parameters:</p>
+      <ul>
+        <li><code>body</code> &ndash; a string containing the response body.</li>
+        <li><code>...params</code> &ndash; an optional list of parameters specified after the converter name in <code>ajxl-convert</code>.</li>
+      </ul>
+
+      <p>Response converters should return the same way as <a href="#custom-methods">methods</a>, as the request body will be passed through them to create the <code>DocumentFragment</code> expected from the default methods.</p>
+
+      <p>Response converters can also accept parameters specified in the <code>ajxl-convert</code> attribute, to allow for specialization of generic converters.</p>
+
+      <script type="codeblock">
+        <script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0"><␛/script>
+        <script>
+          Ajaxial.responseConverters.mustache = (body, template) => {
+            const template = document.querySelector(`template[name="${template}"]`).innerHTML
+            const rendered = Mustache.render(template, JSON.parse(body))
+            return Ajaxial.responseConverters.html(rendered)
+          }
+        <␛/script>
+
+        <template name="greeting">
+          <p>Hello, {{greetee}}!</p>
+        </template>
+
+        <button ajxl-path="/api/users"
+                ajxl-params='{"name":"World"}'
+                ajxl-target="#greeting-out"
+                ajxl-convert="mustache greeting">Click me!</button>
+        <div id="greeting-out"></div>
+      </script>
+
+      <h3>Adjusting Defaults</h3>
+      <p>All of Ajaxial's default values for attributes which refer to extensible registries can be adjusted by overriding the key in that registry corresponding to the <code>Ajaxial.default</code> symbol.</p>
+
+      <script type="codeblock" data-lang="js">
+        Ajaxial.methods[Ajaxial.default] = 'post'
+      </script>
+
+      <p>You can also adjust the default value of <code>ajxl-event</code> on a per-tag basis by adding keys to <code>Ajaxial.defaultEvents</code>.</p>
+
+      <script type="codeblock" data-lang="js">
+        Ajaxial.defaultEvents['template'] = ':load'
+      </script>
+    </article>
+  </div>
+
+  <a href="#top">Return to top</a>
+
+  <footer>
+    &copy; Katrina Scialdone <script>document.currentScript.outerHTML=new Date().getFullYear()</script>
+  </footer>
+</body>
+</html>

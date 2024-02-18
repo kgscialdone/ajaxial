@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajaxial - Painless, JavaScript-free AJAX</title>
+  <link rel="icon" href="/assets/favicon.png" />
+
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/ajaxial.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/index.js" defer></script>
+</head>
+<body>
+  <header>
+    <span><img src="/assets/helmet.svg" /> Ajaxial</span>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/docs">Documentation</a>
+      <a href="https://github.com/kgscialdone/ajaxial" target="_blank">Github</a>
+    </nav>
+  </header>
+
+  <article>
+    <div class="hero">
+      <h1><img src="/assets/helmet.svg" /> Ajaxial</h1>
+      <script type="codeblock" class="embed">
+        <script src="https://cdn.jsdelivr.net/gh/kgscialdone/ajaxial@␋/ajaxial.min.js"><␛/script>
+      </script>
+      <ul>
+        <li><a href="javascript:navigator.clipboard.writeText(document.querySelector('.embed').textContent);alert('Copied!')">Copy to Clipboard</a></li>
+        <li><a href="https://github.com/kgscialdone/ajaxial/releases" target="_blank">Downloads</a></li>
+        <li><a href="/docs">Documentation</a></li>
+      </ul>
+    </div>
+
+    <div class="two-columns">
+      <div class="content">
+        <h2>Painless, JavaScript-free AJAX</h2>
+        <p>Ajaxial is a single-file web library that embeds AJAX instructions directly in your HTML structure, allowing you to painlessly design client-server interactions without ever touching JavaScript yourself.</p>
+        <p>With AJAX at your fingertips, the web becomes more powerful than all of Greece!</p>
+      </div>
+      <script type="codeblock">
+        <!-- A form like this... -->
+        <form ajxl-path="/subscribe" 
+              ajxl-method="post" 
+              ajxl-swap="outerHTML">
+          <input type="email" name="email" required />
+          <button type="submit">Subscribe!</button>
+        </form>
+        
+        <!-- ...can turn into this when submitted! -->
+        <p>Thank you for subscribing!</p>
+      </script>
+    </div>
+    <div class="two-columns reverse">
+      <div class="content">
+        <h2>Powerfully Extensible</h2>
+        <p>By defining nearly all of its key functionality modularly, Ajaxial opens itself up to extreme customizability for any situation you might need, from retrieving <code>&lt;template></code> elements instead of making HTTP requests, to custom processing of response content, and more.</p>
+      </div>
+      <script type="codeblock">
+        <form ajxl-path="/accept-entries" ajxl-method="post">
+          <button ajxl-path="entry-input" 
+                  ajxl-method="template" 
+                  ajxl-target="beforebegin">Add Entry</button>
+          <button type="submit">Submit</button>
+        </form>
+        
+        <template name="entry-input">
+          <input name="entries[]" type="text">
+        </template>
+        
+        <script>
+          Ajaxial.methods.template = path => {
+            return document.querySelector(`template[name="${path}"]`)?.content
+          }
+        <␛/script>
+      </script>
+    </div>
+    <div class="two-columns">
+      <div class="content">
+        <h2>Deeply Event-Driven</h2>
+        <p>Everything in Ajaxial runs on events from top to bottom, allowing seamless integration with any other libraries or frameworks that expose their own events, or can consume Ajaxial's events.</p>
+        <p>This example uses two other libraries that pair excellently with Ajaxial, <a href="https://github.com/kgscialdone/facet" target="_blank">Facet</a> for web components and <a href="https://highlightjs.org" target="_blank">highlight.js</a> for syntax highlighting.</p>
+      </div>
+      <script type="codeblock">
+        <template component="load-example">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+        
+          <script on="connect" once>Ajaxial.process(root)<␛/script>
+          <script on="ajaxial:finish" once>
+            hljs.highlightElement(root.querySelector('code'))
+          <␛/script>
+        
+          <link inherit="path>ajxl-path"
+                ajxl-target="code.language-html"
+                ajxl-convert="plaintext"
+                ajxl-event=":load" />
+        
+          <pre><code class="language-html"></code></pre>
+        </template>
+      </script>
+    </div>
+
+    <div class="hero">
+      <h2>Power up the web with Ajaxial</h2>
+      <ul>
+        <li><a href="https://github.com/kgscialdone/ajaxial/releases" target="_blank">Downloads</a></li>
+        <li><a href="/docs">Documentation</a></li>
+      </ul>
+    </div>
+  </article>
+
+  <footer>
+    &copy; Katrina Scialdone <script>document.currentScript.outerHTML=new Date().getFullYear()</script>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,88 @@
+{
+  "version": 1.1,
+  "globalAttributes": [{
+    "name": "ajxl-path",
+    "description": "Mark an element for processing with Ajaxial. The attribute's value will be used as the URL or identifier of the requested resource."
+  },{
+    "name": "ajxl-method",
+    "description": "Declare the method by which Ajaxial should perform a request when triggered. Defaults to `get`.",
+    "valueSet": "disinheritable",
+    "values": [
+      { "name": "get",    "description": "Make an HTTP GET request to the URL in `ajxl-path`. Encodes parameters in the requested URL's query string." },
+      { "name": "post",   "description": "Make an HTTP POST request to the URL in `ajxl-path`. Encodes parameters in the request body." },
+      { "name": "put",    "description": "Make an HTTP PUT request to the URL in `ajxl-path`. Encodes parameters in the request body." },
+      { "name": "patch",  "description": "Make an HTTP PATCH request to the URL in `ajxl-path`. Encodes parameters in the request body." },
+      { "name": "delete", "description": "Make an HTTP DELETE request to the URL in `ajxl-path`. Encodes parameters in the requested URL's query string." }
+    ]
+  },{
+    "name": "ajxl-event",
+    "description": "Declare the event(s) on which an Ajaxial request should trigger. Defaults to `submit` for forms, `change` for inputs / selects / textareas, and `click` for other elements.",
+    "valueSet": "disinheritable",
+    "values": [
+      { "name": ":load",           "description": "Trigger after being processed by Ajaxial." },
+      { "name": ":trigger",        "description": "Trigger before an Ajaxial trigger occurs (be careful of recursion!)." },
+      { "name": ":swap",           "description": "Trigger before an Ajaxial trigger performs a swap." },
+      { "name": ":finish",         "description": "Trigger after an Ajaxial trigger finishes processing." },
+      { "name": ":requestError",   "description": "Trigger when Ajaxial encounters an HTTP request error." },
+      { "name": ":requestSuccess", "description": "Trigger when Ajaxial recieves a 2xx HTTP response code." },
+      { "name": ":requestFailure", "description": "Trigger when Ajaxial recieves a non-2xx HTTP response code." }
+    ]
+  },{
+    "name": "ajxl-target",
+    "description": "Declare a CSS selector resolving to the elements which Ajaxial should target for swapping in response content.",
+    "valueSet": "disinheritable"
+  },{
+    "name": "ajxl-swap",
+    "description": "Declare the method by which Ajaxial should swap response content into the target elements. Defaults to `innerHTML`.",
+    "valueSet": "disinheritable",
+    "values": [
+      { "name": "innerHTML",   "description": "Replace each target element's children with the response content." },
+      { "name": "outerHTML",   "description": "Replace each target element with the response content." },
+      { "name": "beforebegin", "description": "Add the response content to each target element's parent, just before the target element." },
+      { "name": "afterbegin",  "description": "Prepend the response content to each target element."},
+      { "name": "beforeend",   "description": "Append the response content to each target element."},
+      { "name": "afterend",    "description": "Add the response content to each target element's parent, just after the target element." },
+      { "name": "none",        "description": "Do not swap in response content." }
+    ]
+  },{
+    "name": "ajxl-encoding",
+    "description": "Declare the format in which POST/PUT/PATCH requests should format their parameters. Defaults to `application/x-www-form-urlencoded`.",
+    "valueSet": "disinheritable",
+    "values": [
+      { "name": "application/x-www-form-urlencoded", "description": "Format parameters as URL-encoded form data." },
+      { "name": "application/json",                  "description": "Format parameters as JSON." },
+      { "name": "multipart/form-data",               "description": "Format parameters as multipart form data." }
+    ]
+  },{
+    "name": "ajxl-convert",
+    "description": "Declare the method by which Ajaxial should process response content for swapping. Defaults to `html`.",
+    "valueSet": "disinheritable",
+    "values": [
+      { "name": "html", "description": "Process the response content as HTML, running scripts and applying styles." },
+      { "name": "plaintext", "description": "Process the response content as plain text." }
+    ]
+  },{
+    "name": "ajxl-params",
+    "description": "Declare additional parameters in JSON format to include in the request.",
+    "valueSet": "disinheritable" 
+  },{
+    "name": "ajxl-headers",
+    "description": "Declare additional HTTP headers in JSON format to include in the request.",
+    "valueSet": "disinheritable" 
+  },{
+    "name": "ajxl-debounce",
+    "description": "Declare a debounce time for Ajaxial triggers in milliseconds. Defaults to `0`.",
+    "valueSet": "disinheritable" 
+  },{
+    "name": "ajxl-settle",
+    "description": "Declare a settle time for swapped-in elements in milliseconds. Defaults to `20`.",
+    "valueSet": "disinheritable" 
+  }],
+  "valueSets": [{
+    "name": "disinheritable",
+    "values": [
+      { "name": "disinherit", 
+        "description": "Prevent this element and its children from inheriting the value of this attribute from this element's ancestors." }
+    ]
+  }]
+}
